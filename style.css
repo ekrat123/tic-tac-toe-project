@@ -1,0 +1,37 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: rgb(218, 231, 242);
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+}
+
+#game-board {
+  width: 302px;
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 1px;
+  margin: 25px auto;
+  background-color: rgba(0, 255, 255, 0.204);
+}
+
+.cell {
+  border: 1px solid black;
+  display: grid;
+  place-items: center;
+  font-size: 4rem;
+}
+
+button {
+  margin: 20px auto;
+  height: 2.25rem;
+  width: 7.5rem;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 255, 0.527);
+  font-size: 0.9rem;
+  font-weight: bold;
+}
