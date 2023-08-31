@@ -17,14 +17,17 @@ function displayBoard() {
 
 function checkWinner() {
   const winningCombos = [
+    // Rows
     [0, 1, 2],
     [3, 4, 5],
-    [6, 7, 8], // Rows
+    [6, 7, 8],
+    // Columns
     [0, 3, 6],
     [1, 4, 7],
-    [2, 5, 8], // Columns
+    [2, 5, 8],
+    // Diagonals
     [0, 4, 8],
-    [2, 4, 6], // Diagonals
+    [2, 4, 6],
   ];
 
   for (const combo of winningCombos) {
@@ -34,10 +37,20 @@ function checkWinner() {
       scoreEl.textContent = `Player ${board[a]} wins`;
       body.appendChild(scoreEl);
       gameBoard.removeEventListener("click", addMark);
-      break;
+      return board[a];
     }
   }
 }
+
+function isTie() {
+  if (board.every((el) => el !== "")) {
+    const scoreEl = document.createElement("h2");
+    scoreEl.textContent = `Tie, noone win`;
+    body.appendChild(scoreEl);
+    gameBoard.removeEventListener("click", addMark);
+  }
+}
+
 function addMark(e) {
   const targetID = e.target.dataset.id;
 
@@ -45,7 +58,7 @@ function addMark(e) {
     board[targetID] = currentPlayer;
     currentPlayer = currentPlayer === "X" ? "O" : "X";
     displayBoard();
-    checkWinner();
+    !checkWinner() ? isTie() : null;
   }
 }
 
