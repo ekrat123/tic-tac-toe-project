@@ -33,21 +33,26 @@ function checkWinner() {
   for (const combo of winningCombos) {
     const [a, b, c] = combo;
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      const scoreEl = document.createElement("h2");
-      scoreEl.textContent = `Player ${board[a]} wins`;
-      body.appendChild(scoreEl);
-      gameBoard.removeEventListener("click", addMark);
+      declareWinner(true);
       return board[a];
     }
   }
 }
 
+function declareWinner(winner) {
+  const scoreEl = document.createElement("h2");
+  if (winner) {
+    scoreEl.textContent = `Player ${currentPlayer} wins`;
+  } else if (!winner) {
+    scoreEl.textContent = `Tie, noone win`;
+  }
+  body.appendChild(scoreEl);
+  gameBoard.removeEventListener("click", addMark);
+}
+
 function isTie() {
   if (board.every((el) => el !== "")) {
-    const scoreEl = document.createElement("h2");
-    scoreEl.textContent = `Tie, noone win`;
-    body.appendChild(scoreEl);
-    gameBoard.removeEventListener("click", addMark);
+    declareWinner(false);
   }
 }
 
@@ -56,9 +61,9 @@ function addMark(e) {
 
   if (!board[targetID]) {
     board[targetID] = currentPlayer;
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
     displayBoard();
     !checkWinner() ? isTie() : null;
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
   }
 }
 
