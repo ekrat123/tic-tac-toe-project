@@ -46,9 +46,7 @@ const Gameboard = (() => {
 })();
 
 // Module for Players
-const Player = (name, marker) => {
-  return { name, marker };
-};
+const Player = (name, marker) => ({ name, marker });
 
 // Module for Display
 const DisplayController = (() => {
