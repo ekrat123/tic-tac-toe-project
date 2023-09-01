@@ -76,7 +76,7 @@ const DisplayController = (() => {
     if (winner === "Tie") {
       scoreEl.textContent = `It's a Tie!`;
     } else {
-      scoreEl.textContent = `Player ${winner.name} wins!`;
+      scoreEl.textContent = `Player ${winner.marker} wins!`;
     }
     body.appendChild(scoreEl);
     gameBoard.removeEventListener("click", handleClick);
@@ -106,8 +106,8 @@ const DisplayController = (() => {
     gameOver = false;
   };
 
-  const player1 = Player("Player 1", "X");
-  const player2 = Player("Player 2", "O");
+  const player1 = Player("Player X", "X");
+  const player2 = Player("Player O", "O");
 
   resetBtn.addEventListener("click", resetGame);
   updateDisplay();
