@@ -1,83 +1,116 @@
-const board = ["", "", "", "", "", "", "", "", ""];
-const gameBoard = document.querySelector("#game-board");
-const resetBtn = document.querySelector("#restart-button");
-const body = document.querySelector("body");
-let currentPlayer = "X";
+// Module for Gameboard
+const Gameboard = (() => {
+  const board = ["", "", "", "", "", "", "", "", ""];
 
-function displayBoard() {
-  gameBoard.innerHTML = "";
-  board.forEach((val, i) => {
-    const cellEl = document.createElement("div");
-    cellEl.classList.add("cell");
-    cellEl.dataset.id = i;
-    cellEl.textContent = val;
-    gameBoard.appendChild(cellEl);
-  });
-}
+  const getBoard = () => board;
 
-function checkWinner() {
-  const winningCombos = [
-    // Rows
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    // Columns
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    // Diagonals
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
+  const checkWinner = () => {
+    const winningCombos = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
 
-  for (const combo of winningCombos) {
-    const [a, b, c] = combo;
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      declareWinner(true);
-      return board[a];
+    for (const combo of winningCombos) {
+      const [a, b, c] = combo;
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return board[a];
+      }
     }
-  }
-}
 
-function declareWinner(winner) {
-  const scoreEl = document.createElement("h2");
-  if (winner) {
-    scoreEl.textContent = `Player ${currentPlayer} wins`;
-  } else if (!winner) {
-    scoreEl.textContent = `Tie, noone win`;
-  }
-  body.appendChild(scoreEl);
-  gameBoard.removeEventListener("click", addMark);
-}
+    if (board.every((el) => el !== "")) {
+      return "Tie";
+    }
 
-function isTie() {
-  if (board.every((el) => el !== "")) {
-    declareWinner(false);
-  }
-}
+    return null;
+  };
 
-function addMark(e) {
-  const targetID = e.target.dataset.id;
+  const makeMove = (index, currentPlayer) => {
+    if (!board[index]) {
+      board[index] = currentPlayer;
+      return true; // Move is valid
+    }
+    return false; // Move is invalid
+  };
 
-  if (!board[targetID]) {
-    board[targetID] = currentPlayer;
-    displayBoard();
-    !checkWinner() ? isTie() : null;
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
-  }
-}
+  const reset = () => {
+    board.fill("");
+  };
 
-function resetGame() {
-  board.fill("");
-  displayBoard();
-  currentPlayer = "X";
-  const scoreEl = document.querySelector("h2");
-  if (scoreEl) {
-    scoreEl.remove();
-  }
-  gameBoard.addEventListener("click", addMark);
-}
+  return { getBoard, checkWinner, makeMove, reset };
+})();
 
-displayBoard();
-gameBoard.addEventListener("click", addMark);
-resetBtn.addEventListener("click", resetGame);
+// Module for Players
+const Player = (name, marker) => {
+  return { name, marker };
+};
+
+// Module for Display
+const DisplayController = (() => {
+  const gameBoard = document.querySelector("#game-board");
+  const resetBtn = document.querySelector("#restart-button");
+  const body = document.querySelector("body");
+
+  let currentPlayer;
+  let gameOver = false;
+
+  const updateDisplay = () => {
+    const board = Gameboard.getBoard();
+    gameBoard.innerHTML = "";
+    board.forEach((val, i) => {
+      const cellEl = document.createElement("div");
+      cellEl.classList.add("cell");
+      cellEl.dataset.id = i;
+      cellEl.textContent = val;
+      gameBoard.appendChild(cellEl);
+    });
+  };
+
+  const declareWinner = (winner) => {
+    const scoreEl = document.createElement("h2");
+    if (winner === "Tie") {
+      scoreEl.textContent = `It's a Tie!`;
+    } else {
+      scoreEl.textContent = `Player ${winner.marker} wins!`;
+    }
+    body.appendChild(scoreEl);
+    gameBoard.removeEventListener("click", handleClick);
+    gameOver = true;
+  };
+
+  const handleClick = (e) => {
+    if (gameOver) return;
+    const targetID = e.target.dataset.id;
+    if (Gameboard.makeMove(targetID, currentPlayer.marker)) {
+      updateDisplay();
+      const winner = Gameboard.checkWinner();
+      if (winner) {
+        declareWinner(winner === "Tie" ? winner : currentPlayer);
+      } else {
+        currentPlayer = currentPlayer === player1 ? player2 : player1;
+      }
+    }
+  };
+
+  const resetGame = () => {
+    Gameboard.reset();
+    updateDisplay();
+    gameBoard.addEventListener("click", handleClick);
+    currentPlayer = player1;
+    body.querySelector("h2").remove();
+    gameOver = false;
+  };
+
+  const player1 = Player("Player X", "X");
+  const player2 = Player("Player O", "O");
+
+  resetBtn.addEventListener("click", resetGame);
+  updateDisplay();
+  gameBoard.addEventListener("click", handleClick);
+  currentPlayer = player1;
+})();
