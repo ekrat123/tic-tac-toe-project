@@ -1,11 +1,11 @@
-// Module for Gameboard
-const Gameboard = (() => {
-  const board = ["", "", "", "", "", "", "", "", ""];
+// Module for gameboard
 
+const GameBoard = (function () {
+  const board = Array(9).fill("");
   const getBoard = () => board;
 
-  const checkWinner = () => {
-    const winningCombos = [
+  const checkWinner = function () {
+    const winnerCombos = [
       [0, 1, 2],
       [3, 4, 5],
       [6, 7, 8],
@@ -16,26 +16,25 @@ const Gameboard = (() => {
       [2, 4, 6],
     ];
 
-    for (const combo of winningCombos) {
+    for (const combo of winnerCombos) {
       const [a, b, c] = combo;
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      if (board[a] && board[a] === board[b] && board[b] === board[c]) {
         return board[a];
       }
     }
 
     if (board.every((el) => el !== "")) {
-      return "Tie";
+      return "tie";
     }
 
     return null;
   };
 
   const makeMove = (index, currentPlayer) => {
-    if (!board[index]) {
-      board[index] = currentPlayer;
-      return true; // Move is valid
+    if (board[index]) {
+      return;
     }
-    return false; // Move is invalid
+    board[index] = currentPlayer;
   };
 
   const reset = () => {
@@ -45,70 +44,67 @@ const Gameboard = (() => {
   return { getBoard, checkWinner, makeMove, reset };
 })();
 
-// Module for Players
-const Player = (name, marker) => ({ name, marker });
+const Player = function (name, marker) {
+  return { name, marker };
+};
 
-// Module for Display
-const DisplayController = (() => {
+const DisplayController = (function () {
   const gameBoard = document.querySelector("#game-board");
   const resetBtn = document.querySelector("#restart-button");
-  const body = document.querySelector("body");
 
-  let currentPlayer;
-  let gameOver = false;
+  const player1 = Player("PlayerX", "X");
+  const player2 = Player("PlayerO", "O");
 
-  const updateDisplay = () => {
-    const board = Gameboard.getBoard();
+  let currentPlayer = player1;
+  let gameIsOver = false;
+
+  const createCell = function (val, i) {
+    const cellEL = document.createElement("div");
+    cellEL.classList.add("cell");
+    cellEL.dataset.id = i;
+    cellEL.textContent = val;
+    return cellEL;
+  };
+
+  const displayBoard = () => {
     gameBoard.innerHTML = "";
+    board = GameBoard.getBoard();
     board.forEach((val, i) => {
-      const cellEl = document.createElement("div");
-      cellEl.classList.add("cell");
-      cellEl.dataset.id = i;
-      cellEl.textContent = val;
-      gameBoard.appendChild(cellEl);
+      gameBoard.appendChild(createCell(val, i));
     });
   };
+  displayBoard();
 
-  const declareWinner = (winner) => {
+  const declareWinner = (win) => {
     const scoreEl = document.createElement("h2");
-    if (winner === "Tie") {
-      scoreEl.textContent = `It's a Tie!`;
-    } else {
-      scoreEl.textContent = `Player ${winner.marker} wins!`;
-    }
-    body.appendChild(scoreEl);
-    gameBoard.removeEventListener("click", handleClick);
-    gameOver = true;
+    scoreEl.textContent =
+      win === "tie" ? "It is a tie" : `Player ${currentPlayer.marker} win`;
+    gameIsOver = true;
+
+    document.body.appendChild(scoreEl);
   };
 
-  const handleClick = (e) => {
-    if (gameOver) return;
-    const targetID = e.target.dataset.id;
-    if (Gameboard.makeMove(targetID, currentPlayer.marker)) {
-      updateDisplay();
-      const winner = Gameboard.checkWinner();
-      if (winner) {
-        declareWinner(winner === "Tie" ? winner : currentPlayer);
-      } else {
-        currentPlayer = currentPlayer === player1 ? player2 : player1;
-      }
+  const clickHandler = (e) => {
+    if (gameIsOver) {
+      return;
     }
+    const targetID = e.target.dataset.id;
+    GameBoard.makeMove(targetID, currentPlayer.marker);
+    displayBoard();
+
+    winner = GameBoard.checkWinner();
+    winner ? declareWinner(winner) : null;
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
   };
 
   const resetGame = () => {
-    Gameboard.reset();
-    updateDisplay();
-    gameBoard.addEventListener("click", handleClick);
+    GameBoard.reset();
+    displayBoard();
     currentPlayer = player1;
-    body.querySelector("h2").remove();
-    gameOver = false;
+    document.querySelector("h2") ? document.querySelector("h2").remove() : null;
+    gameIsOver = false;
   };
 
-  const player1 = Player("Player X", "X");
-  const player2 = Player("Player O", "O");
-
+  gameBoard.addEventListener("click", clickHandler);
   resetBtn.addEventListener("click", resetGame);
-  updateDisplay();
-  gameBoard.addEventListener("click", handleClick);
-  currentPlayer = player1;
 })();
