@@ -34,6 +34,7 @@ const GameBoard = (function () {
       return; // If the cell is already occupied, do nothing
     }
     board[index] = currentPlayer; // Set the cell to the current player's marker
+    return board[index];
   };
 
   const reset = () => {
@@ -97,11 +98,11 @@ const DisplayController = (function () {
       return;
     }
     const targetID = e.target.dataset.id;
-    GameBoard.makeMove(targetID, currentPlayer.marker);
+    const result = GameBoard.makeMove(targetID, currentPlayer.marker);
     displayBoard();
 
     winner = GameBoard.checkWinner();
-    winner ? declareWinner(winner) : declareTurn();
+    winner ? declareWinner(winner) : result ? declareTurn() : null;
   };
 
   const resetGame = () => {
